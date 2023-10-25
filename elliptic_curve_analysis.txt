@@ -1,0 +1,118 @@
+//X1(11)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([0,-1,-1,0,0]);
+print "Rank of X1(11) over Q = ", Rank(E);
+print "Torsion Subgroup of X1(11) over Q = ",TorsionSubgroup(E);
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L,3);
+    for s in S do
+            E:=EllipticCurve([0,-1,-1,0,0]);
+            E:=BaseChange(E,s[1]);
+	    print "K = ", s[1], ", Cyclotomic Field = ", i;
+            print "Rank of X1(11) over K = ", Rank(E);
+            print "Torsion Subgroup of X1(11) over K = ",TorsionSubgroup(E);
+    end for;
+end for;
+
+//X1(14)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([1,0,1,-1,0]);
+print "Rank of X1(14) over Q = ", Rank(E);
+print "Torsion Subgroup of X1(14) over Q = ",TorsionSubgroup(E);
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L, 3);
+    for s in S do
+            E:=EllipticCurve([1,0,1,-1,0]);
+            E:=BaseChange(E,s[1]);
+            print "K = ", s[1], ", Cyclotomic = ", i;
+            print "Rank of X1(14) over K = ", Rank(E);
+            print "Torsion Subgroup of X1(14) over K = ",TorsionSubgroup(E);
+    end for;
+end for;
+
+
+//X1(15)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([1,1,1,0,0]);
+print "Rank of X1(15) over Q = ", Rank(E);
+print "Torsion Subgroup of X1(15) over Q = ",TorsionSubgroup(E);
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L,3);
+    for s in S do
+            E:=EllipticCurve([1,1,1,0,0]);
+            E:=BaseChange(E,s[1]);
+            print "K = ", s[1], ", Cyclotomic = ", i;
+            print "Rank of X1(15) over K = ", Rank(E);
+            print "Torsion Subgroup of X1(15) over K = ",TorsionSubgroup(E);
+    end for;
+end for;
+
+
+//X1(2,10)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([0,1,0,-1,0]);
+print "Rank of X1(2,10) over Q = ", Rank(E);
+print "Torsion Subgroup of X1(2,10) over Q = ",TorsionSubgroup(E);
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L,3);
+    for s in S do
+            E:=EllipticCurve([0,1,0,-1,0]);
+            E:=BaseChange(E,s[1]);
+            print "K = ", s[1], ", Cyclotomic = ", i;
+            print "Rank of X1(2,10) over K = ", Rank(E);
+            print "Torsion Subgroup of X1(2,10) over K = ",TorsionSubgroup(E);
+    end for;
+end for;
+
+
+//X1(2,12)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([0,-1,0,1,0]);
+print "Rank of X1(2,12) over Q = ", Rank(E);
+print "Torsion Subgroup of X1(2,12) over Q = ",TorsionSubgroup(E);
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L,3);
+    for s in S do
+            E:=EllipticCurve([0,-1,0,1,0]);
+            E:=BaseChange(E,s[1]);
+            print "K = ", s[1], ", Cyclotomic = ", i;
+            print "Rank of X1(2,12) over K = ", Rank(E);
+            print "Torsion Subgroup of X1(2,12) over K = ",TorsionSubgroup(E);
+    end for;
+end for;
+
+
+//X0(20)
+P<x>:=PolynomialRing(Rationals());
+E:=EllipticCurve([0, 1, 0 , 4, 4]);
+print "Rank of X0(20) over Q = ", Rank(E);
+print "Torsion Subgroup of X0(20) over Q = ",TorsionSubgroup(E);
+
+
+
+for i in [2..100] do
+    L:=CyclotomicField(i);
+    S:=Subfields(L,3);
+    for s in S do
+            E:=EllipticCurve([0, 1, 0 , 4, 4]);
+            E:=BaseChange(E,s[1]);
+	    print "K = ", s[1], ", Cyclotomic = ", i;
+            print "Rank of X0(20) over K = ", Rank(E);
+            print "Torsion Subgroup of X0(20) over K = ",TorsionSubgroup(E);
+    end for;
+end for;

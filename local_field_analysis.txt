@@ -1,0 +1,18 @@
+K.<a> = NumberField(x^3-7*x^2+14*x - 7);
+is_split = lambda F,x:sum([t[1] for t in list(F.factor(x))])>1
+for y in range(30):
+    if is_prime(y):
+        print (y ,is_split(K,y))
+
+L:= CyclotomicField(7);
+K:= Subfields(L)[3][1];
+P<x>:=PolynomialRing(Rationals());
+C:=HyperellipticCurve(x^6-2*x^5+x^4-2*x^3+6*x^2-4*x+1);
+J:=Jacobian(C);
+print TorsionSubgroup(J);
+
+for i in [3, 5, 7, 9, 11, 17, 19, 23, 25, 27, 29] do
+    Fn := FiniteField(i);
+    J1 := BaseChange(J, Fn);
+    print i, #Points(J1);
+end for;
