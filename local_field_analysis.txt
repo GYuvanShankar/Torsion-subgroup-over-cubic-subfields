@@ -1,18 +1,143 @@
-K.<a> = NumberField(x^3-7*x^2+14*x - 7);
-is_split = lambda F,x:sum([t[1] for t in list(F.factor(x))])>1
-for y in range(30):
-    if is_prime(y):
-        print (y ,is_split(K,y))
+#Run this code on SageMath by calling splitting_primes, parameter for function call is conductor of the field
+def splitting_primes(conductor):
+    X = {13 : [5, 13], 19: [3, 7, 11], 31: [23, 29], 37:[3, 11], 43:[41, 47], 61:[3, 11, 23], 63:[5, 7, 47], 67:[5],
+        73: [3], 79:[61, 67], 91:[3,7], 97:[11,13,19,47]}
+    is_split = lambda F,x:sum([t[1] for t in list(F.factor(x))])>1
+    F = CyclotomicField(conductor);
+    L = F.subfields(3);
+    for K in L:
+        print("Over field: ", K[0])
+        for y in X[conductor]:
+            if is_prime(y):
+                print (y ,is_split(K[0],y))
 
-L:= CyclotomicField(7);
-K:= Subfields(L)[3][1];
-P<x>:=PolynomialRing(Rationals());
-C:=HyperellipticCurve(x^6-2*x^5+x^4-2*x^3+6*x^2-4*x+1);
-J:=Jacobian(C);
-print TorsionSubgroup(J);
+-----------------------------------------------------------------
+//Run this code in magma by calling local_field_analysis_13 or local_field_analysis_18, parameter for function call is conductor of the field required
 
-for i in [3, 5, 7, 9, 11, 17, 19, 23, 25, 27, 29] do
-    Fn := FiniteField(i);
-    J1 := BaseChange(J, Fn);
-    print i, #Points(J1);
-end for;
+local_field_analysis_13 := function(n)
+    P<x>:=PolynomialRing(Rationals());
+    C:=HyperellipticCurve(x^6-2*x^5+x^4-2*x^3+6*x^2-4*x+1);
+    J:=Jacobian(C);
+    if n eq 19 or n eq 91 then
+        F_7 := FiniteField(7);
+        J1 := BaseChange(J, F_7);
+        F_27 := FiniteField(27);
+        J2 := BaseChange(J, F_27);
+        print "#J(F_7) = ", #J1;
+        print "#J(F_27) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 37 then
+        F_11:= FiniteField(11);
+        J1 := BaseChange(J, F_11);
+        F_27 := FiniteField(27);
+        J2 := BaseChange(J, F_27);
+        print "#J(F_11) = ", #J1;
+        print "#J(F_27) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 61 or n eq 73 or n eq 91 then
+        F_3 := FiniteField(3);
+        J1 := BaseChange(J, F_3);
+        print "#J(F_3) = ", #J1;
+    end if;
+    if n eq 67 then
+        F_5 := FiniteField(5);
+        J1 := BaseChange(J, F_5);
+        print "#J(F_5) = ", #J1;
+    end if;
+    if n eq 79 then
+        F_61:= FiniteField(61);
+        J1 := BaseChange(J, F_61);
+        F_67 := FiniteField(67);
+        J2 := BaseChange(J, F_67);
+        print "#J(F_61) = ", #J1;
+        print "#J(F_67) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 97 then
+        F_19:= FiniteField(19);
+        J1 := BaseChange(J, F_19);
+        F_47 := FiniteField(47);
+        J2 := BaseChange(J, F_47);
+        print "#J(F_19) = ", #J1;
+        print "#J(F_47) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    return 0;
+end function;        
+
+local_field_analysis_18 := function(n)
+    P<x>:=PolynomialRing(Rationals());
+    C:=HyperellipticCurve(x^6+2*x^5+5*x^4+10*x^3+10*x^2+4*x+1);
+    J:=Jacobian(C);
+    if n eq 13 then
+        F_5 := FiniteField(5);
+        J1 := BaseChange(J, F_5);
+        F_13 := FiniteField(13);
+        J2 := BaseChange(J, F_13);
+        print "#J(F_5) = ", #J1;
+        print "#J(F_13) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 19 then
+        F_7 := FiniteField(7);
+        J1 := BaseChange(J, F_7);
+        F_11 := FiniteField(11);
+        J2 := BaseChange(J, F_11);
+        print "#J(F_7) = ", #J1;
+        print "#J(F_11) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 31 then
+        F_23:= FiniteField(23);
+        J1 := BaseChange(J, F_23);
+        F_29 := FiniteField(29);
+        J2 := BaseChange(J, F_29);
+        print "#J(F_23) = ", #J1;
+        print "#J(F_29) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 43 then
+        F_41:= FiniteField(41);
+        J1 := BaseChange(J, F_41);
+        F_47 := FiniteField(47);
+        J2 := BaseChange(J, F_47);
+        print "#J(F_41) = ", #J1;
+        print "#J(F_47) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 61 then
+        F_11 := FiniteField(11);
+        J1 := BaseChange(J, F_11);
+        F_23 := FiniteField(23);
+        J2 := BaseChange(J, F_23);
+        print "#J(F_11) = ", #J1;
+        print "#J(F_23) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 63 or n eq 67 then
+        F_5 := FiniteField(5);
+        J1 := BaseChange(J, F_5);
+        print "#J(F_5) = ", #J1;
+    end if;
+    if n eq 63 then
+        F_7:= FiniteField(7);
+        J1 := BaseChange(J, F_7);
+        F_47 := FiniteField(47);
+        J2 := BaseChange(J, F_47);
+        print "#J(F_7) = ", #J1;
+        print "#J(F_47) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    if n eq 97 then
+        F_11:= FiniteField(11);
+        J1 := BaseChange(J, F_11);
+        F_13 := FiniteField(13);
+        J2 := BaseChange(J, F_13);
+        print "#J(F_11) = ", #J1;
+        print "#J(F_13) = ", #J2;
+        print "gcd = ", GCD(#J1, #J2);
+    end if;
+    return 0;
+end function;
