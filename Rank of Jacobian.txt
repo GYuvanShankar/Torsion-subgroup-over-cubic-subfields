@@ -1,2 +1,653 @@
 // X_1(13)
+// For N=79,91,97 we use twists of L function to conclude that the rank is 0
 
+
+// Make newform 13.2.e.a in Magma, downloaded from the LMFDB on 14 October 2023.
+// To make the character of type GrpDrchElt, type "MakeCharacter_13_e();"
+// To make the character of type GrpDrchElt with Codomain the HeckeField, type "MakeCharacter_13_e_Hecke();"
+// To make the coeffs of the qexp of the newform in the Hecke field type "qexpCoeffs();"
+// To make the newform (type ModFrm), type "MakeNewformModFrm_13_2_e_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose lines below.
+// The precision argument determines an initial guess on how many Fourier coefficients to use.
+// This guess is increased enough to uniquely determine the newform.
+// To make the Hecke irreducible modular symbols subspace (type ModSym)
+// containing the newform, type "MakeNewformModSym_13_2_e_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose line below.
+// The default sign is -1.  You can change this with the optional parameter "sign".
+function ConvertToHeckeField(input: pass_field := false, Kf := [])
+    if not pass_field then
+        poly := [*1, -1, 1*];
+        Kf := NumberField(Polynomial([elt : elt in poly]));
+        AssignNames(~Kf, ["nu"]);
+    end if;
+    Rfbasis := [Kf.1^i : i in [0..Degree(Kf)-1]];
+    inp_vec := Vector(Rfbasis)*ChangeRing(Transpose(Matrix([[elt : elt in row] : row in input])),Kf);
+    return Eltseq(inp_vec);
+end function;
+
+
+// To make the character of type GrpDrchElt, type "MakeCharacter_13_e();"
+function MakeCharacter_13_e()
+    N := 13;
+    order := 6;
+    char_gens := [*2*];
+    v := [*
+1*];
+    // chi(gens[i]) = zeta^v[i]
+    assert SequenceToList(UnitGenerators(DirichletGroup(N))) eq char_gens;
+    F := CyclotomicField(order);
+    chi := DirichletCharacterFromValuesOnUnitGenerators(DirichletGroup(N,F),[F|F.1^e:e in v]);
+    return MinimalBaseRingCharacter(chi);
+end function;
+
+// To make the character of type GrpDrchElt with Codomain the HeckeField, type "MakeCharacter_13_e_Hecke();"
+function MakeCharacter_13_e_Hecke(Kf)
+    N := 13;
+    order := 6;
+    char_gens := [*2*];
+    char_values := [*[*0, 1*]*];
+    assert SequenceToList(UnitGenerators(DirichletGroup(N))) eq char_gens;
+    values := ConvertToHeckeField(char_values : pass_field := true, Kf := Kf); // the value of chi on the gens as elements in the Hecke field
+    F := Universe(values);// the Hecke field
+    chi := DirichletCharacterFromValuesOnUnitGenerators(DirichletGroup(N,F),values);
+    return chi;
+end function;
+
+
+function ExtendMultiplicatively(weight, aps, character)
+    prec := NextPrime(NthPrime(#aps)) - 1; // we will able to figure out a_0 ... a_prec
+    primes := PrimesUpTo(prec);
+    prime_powers := primes;
+    assert #primes eq #aps;
+    log_prec := Floor(Log(prec)/Log(2)); // prec < 2^(log_prec+1)
+    F := Universe(aps);
+    FXY<X, Y> := PolynomialRing(F, 2);
+    // 1/(1 - a_p T + p^(weight - 1) * char(p) T^2) = 1 + a_p T + a_{p^2} T^2 + ...
+    R<T> := PowerSeriesRing(FXY : Precision := log_prec + 1);
+    recursion := Coefficients(1/(1 - X*T + Y*T^2));
+    coeffs := [F!0: i in [1..(prec+1)]];
+    coeffs[1] := 1; //a_1
+    for i := 1 to #primes do
+        p := primes[i];
+        coeffs[p] := aps[i];
+        b := p^(weight - 1) * F!character(p);
+        r := 2;
+        p_power := p * p;
+        //deals with powers of p
+        while p_power le prec do
+            Append(~prime_powers, p_power);
+            coeffs[p_power] := Evaluate(recursion[r + 1], [aps[i], b]);
+            p_power *:= p;
+            r +:= 1;
+        end while;    
+    end for;
+    Sort(~prime_powers);
+    for pp in prime_powers do
+        for k := 1 to Floor(prec/pp) do
+            if GCD(k, pp) eq 1 then
+                coeffs[pp*k] := coeffs[pp]*coeffs[k];
+            end if;
+        end for;
+    end for;
+    return coeffs;
+end function;
+
+
+function qexpCoeffs()
+    // To make the coeffs of the qexp of the newform in the Hecke field type "qexpCoeffs();"
+    weight := 2;
+    raw_aps := [*
+[*-1, -1*],
+        [*-2, 2*],
+        [*1, -2*],
+        [*0, 0*],
+        [*0, 0*],
+        [*-1, -3*],
+        [*0, 3*],
+        [*-4, 2*],
+        [*6, -6*],
+        [*-3, 3*],
+        [*-2, 4*],
+        [*5, 5*],
+        [*-3, -3*],
+        [*0, -8*],
+        [*2, -4*],
+        [*-3, 0*],
+        [*8, -4*],
+        [*0, -1*],
+        [*2, 2*],
+        [*4, -2*],
+        [*-1, 2*],
+        [*4, 0*],
+        [*-8, 16*],
+        [*-4, -4*],
+        [*8, -4*],
+        [*3, -3*],
+        [*-10, 0*],
+        [*-6, 6*],
+        [*8, -16*],
+        [*0, 15*],
+        [*2, -2*],
+        [*18, 0*],
+        [*-18, 9*],
+        [*0, 4*],
+        [*-22, 11*],
+        [*-10, 20*],
+        [*-13, 0*],
+        [*24, -12*],
+        [*-8, -8*],
+        [*0, -6*],
+        [*0, 0*],
+        [*11, 0*],
+        [*0, -18*],
+        [*-3, -3*],
+        [*8, 8*],
+        [*0, 2*],
+        [*-10, 10*],
+        [*-6, -6*],
+        [*28, -14*],
+        [*0, 0*],
+        [*6, 0*],
+        [*12, -24*],
+        [*-2, 1*],
+        [*0, 18*],
+        [*-3, 3*],
+        [*-12, 12*],
+        [*0, 6*],
+        [*12, 12*],
+        [*0, 7*],
+        [*13, -26*],
+        [*-4, 4*],
+        [*6, -3*],
+        [*10, -20*],
+        [*-30, 0*],
+        [*10, 0*],
+        [*3, -6*],
+        [*-32, 16*],
+        [*-23, 0*],
+        [*0, 30*],
+        [*8, 8*],
+        [*19, 19*],
+        [*4, -8*],
+        [*22, -22*],
+        [*0, -19*],
+        [*-14, -14*],
+        [*-24, 12*],
+        [*-9, 0*],
+        [*-16, 8*],
+        [*-1, -1*],
+        [*18, -9*],
+        [*-18, 18*],
+        [*-9, 18*],
+        [*-4, -4*],
+        [*0, 17*],
+        [*28, -28*],
+        [*-12, 0*],
+        [*-8, 4*],
+        [*1, 1*],
+        [*26, -13*],
+        [*-8, 16*],
+        [*12, 0*],
+        [*14, 14*],
+        [*-8, 4*],
+        [*-12, 12*],
+        [*-18, 36*],
+        [*0, -36*],
+        [*11, 11*],
+        [*9, 0*],
+        [*16, -16*],
+        [*-17, 34*],
+        [*-22, 0*],
+        [*-9, -9*],
+        [*0, 0*],
+        [*42, -42*],
+        [*40, 0*],
+        [*11, -22*],
+        [*-12, -12*],
+        [*15, -30*],
+        [*30, 0*],
+        [*-25, 25*],
+        [*0, 34*],
+        [*-7, -7*],
+        [*-26, 13*],
+        [*12, -24*],
+        [*-56, 28*],
+        [*0, -33*],
+        [*16, -8*],
+        [*-18, 18*],
+        [*30, -30*],
+        [*0, 12*],
+        [*-27, -27*],
+        [*19, -19*],
+        [*-6, 0*],
+        [*28, -14*],
+        [*8, 8*],
+        [*18, 0*],
+        [*-6, 3*],
+        [*0, 48*],
+        [*-32, 0*],
+        [*-7, 14*],
+        [*-12, -12*],
+        [*-20, -20*],
+        [*16, -16*],
+        [*26, -26*],
+        [*40, -20*],
+        [*4, 4*],
+        [*-40, 20*],
+        [*44, -22*],
+        [*0, -42*],
+        [*-33, 33*],
+        [*22, -44*],
+        [*-24, -24*],
+        [*0, 4*],
+        [*-12, 24*],
+        [*-25, 25*],
+        [*52, -26*],
+        [*-15, 30*],
+        [*3, 0*],
+        [*-14, 0*],
+        [*16, -32*],
+        [*14, -7*],
+        [*-27, 27*],
+        [*10, 0*],
+        [*-36, 36*],
+        [*-28, 28*],
+        [*0, 0*],
+        [*0, -22*],
+        [*-54, 27*],
+        [*7, 0*],
+        [*-12, 24*],
+        [*-10, -10*],
+        [*0, 6*],
+        [*-34, 68*],
+        [*0, -6*],
+        [*25, 25*],
+        [*-30, 60*],
+        [*-2, 2*],
+        [*0, -17*]*];
+    aps := ConvertToHeckeField(raw_aps);
+    chi := MakeCharacter_13_e_Hecke(Universe(aps));
+    return ExtendMultiplicatively(weight, aps, chi);
+end function;
+
+
+// To make the newform (type ModFrm), type "MakeNewformModFrm_13_2_e_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose lines below.
+// The precision argument determines an initial guess on how many Fourier coefficients to use.
+// This guess is increased enough to uniquely determine the newform.
+function MakeNewformModFrm_13_2_e_a(:prec:=2)
+    chi := MakeCharacter_13_e();
+    f_vec := qexpCoeffs();
+    Kf := Universe(f_vec);
+    // SetVerbose("ModularForms", true);
+    // SetVerbose("ModularSymbols", true);
+    S := CuspidalSubspace(ModularForms(chi, 2));
+    S := BaseChange(S, Kf);
+    maxprec := NextPrime(997) - 1;
+    while true do
+        trunc_vec := Vector(Kf, [0] cat [f_vec[i]: i in [1..prec]]);
+        B := Basis(S, prec + 1);
+        S_basismat := Matrix([AbsEltseq(g): g in B]);
+        if Rank(S_basismat) eq Min(NumberOfRows(S_basismat), NumberOfColumns(S_basismat)) then
+            S_basismat := ChangeRing(S_basismat,Kf);
+            f_lincom := Solution(S_basismat,trunc_vec);
+            f := &+[f_lincom[i]*Basis(S)[i] : i in [1..#Basis(S)]];
+            return f;
+        end if;
+        error if prec eq maxprec, "Unable to distinguish newform within newspace";
+        prec := Min(Ceiling(1.25 * prec), maxprec);
+    end while;
+end function;
+
+
+// To make the Hecke irreducible modular symbols subspace (type ModSym)
+// containing the newform, type "MakeNewformModSym_13_2_e_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose line below.
+// The default sign is -1.  You can change this with the optional parameter "sign".
+function MakeNewformModSym_13_2_e_a( : sign := -1)
+    R<x> := PolynomialRing(Rationals());
+    chi := MakeCharacter_13_e();
+    // SetVerbose("ModularSymbols", true);
+    Snew := NewSubspace(CuspidalSubspace(ModularSymbols(chi,2,sign)));
+    Vf := Kernel([],Snew);
+    return Vf;
+end function;
+
+f := MakeNewformModFrm_13_2_e_a();
+CC<i> := ComplexField();
+rts := [r[1] : r in Roots(MinimalPolynomial(BaseField(f).1),CC)];
+Ls := [LSeries(f : Embedding := hom<BaseRing(f) -> CC | rts[i]>) : i in [1..2]];
+G := DirichletGroup(91, CyclotomicField(3));
+chi := G.1^2*G.2^2;
+Lchi := LSeries(chi);
+Ltwist := TensorProduct(Ls[1],Lchi);
+
+Evaluate(Ltwist,1); // non zero
+
+
+// X_1(18)
+// For N=37,63,79,97 we use twists of L function to conclude that the rank is 0
+
+
+// Make newform 18.2.c.a in Magma, downloaded from the LMFDB on 17 October 2023.
+// To make the character of type GrpDrchElt, type "MakeCharacter_18_c();"
+// To make the character of type GrpDrchElt with Codomain the HeckeField, type "MakeCharacter_18_c_Hecke();"
+// To make the coeffs of the qexp of the newform in the Hecke field type "qexpCoeffs();"
+// To make the newform (type ModFrm), type "MakeNewformModFrm_18_2_c_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose lines below.
+// The precision argument determines an initial guess on how many Fourier coefficients to use.
+// This guess is increased enough to uniquely determine the newform.
+// To make the Hecke irreducible modular symbols subspace (type ModSym)
+// containing the newform, type "MakeNewformModSym_18_2_c_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose line below.
+// The default sign is -1.  You can change this with the optional parameter "sign".
+function ConvertToHeckeField(input: pass_field := false, Kf := [])
+    if not pass_field then
+        poly := [*1, -1, 1*];
+        Kf := NumberField(Polynomial([elt : elt in poly]));
+        AssignNames(~Kf, ["nu"]);
+    end if;
+    Rfbasis := [Kf.1^i : i in [0..Degree(Kf)-1]];
+    inp_vec := Vector(Rfbasis)*ChangeRing(Transpose(Matrix([[elt : elt in row] : row in input])),Kf);
+    return Eltseq(inp_vec);
+end function;
+
+
+// To make the character of type GrpDrchElt, type "MakeCharacter_18_c();"
+function MakeCharacter_18_c()
+    N := 18;
+    order := 3;
+    char_gens := [*11*];
+    v := [*
+2*];
+    // chi(gens[i]) = zeta^v[i]
+    assert SequenceToList(UnitGenerators(DirichletGroup(N))) eq char_gens;
+    F := CyclotomicField(order);
+    chi := DirichletCharacterFromValuesOnUnitGenerators(DirichletGroup(N,F),[F|F.1^e:e in v]);
+    return MinimalBaseRingCharacter(chi);
+end function;
+
+// To make the character of type GrpDrchElt with Codomain the HeckeField, type "MakeCharacter_18_c_Hecke();"
+function MakeCharacter_18_c_Hecke(Kf)
+    N := 18;
+    order := 3;
+    char_gens := [*11*];
+    char_values := [*[*-1, 1*]*];
+    assert SequenceToList(UnitGenerators(DirichletGroup(N))) eq char_gens;
+    values := ConvertToHeckeField(char_values : pass_field := true, Kf := Kf); // the value of chi on the gens as elements in the Hecke field
+    F := Universe(values);// the Hecke field
+    chi := DirichletCharacterFromValuesOnUnitGenerators(DirichletGroup(N,F),values);
+    return chi;
+end function;
+
+
+function ExtendMultiplicatively(weight, aps, character)
+    prec := NextPrime(NthPrime(#aps)) - 1; // we will able to figure out a_0 ... a_prec
+    primes := PrimesUpTo(prec);
+    prime_powers := primes;
+    assert #primes eq #aps;
+    log_prec := Floor(Log(prec)/Log(2)); // prec < 2^(log_prec+1)
+    F := Universe(aps);
+    FXY<X, Y> := PolynomialRing(F, 2);
+    // 1/(1 - a_p T + p^(weight - 1) * char(p) T^2) = 1 + a_p T + a_{p^2} T^2 + ...
+    R<T> := PowerSeriesRing(FXY : Precision := log_prec + 1);
+    recursion := Coefficients(1/(1 - X*T + Y*T^2));
+    coeffs := [F!0: i in [1..(prec+1)]];
+    coeffs[1] := 1; //a_1
+    for i := 1 to #primes do
+        p := primes[i];
+        coeffs[p] := aps[i];
+        b := p^(weight - 1) * F!character(p);
+        r := 2;
+        p_power := p * p;
+        //deals with powers of p
+        while p_power le prec do
+            Append(~prime_powers, p_power);
+            coeffs[p_power] := Evaluate(recursion[r + 1], [aps[i], b]);
+            p_power *:= p;
+            r +:= 1;
+        end while;    
+    end for;
+    Sort(~prime_powers);
+    for pp in prime_powers do
+        for k := 1 to Floor(prec/pp) do
+            if GCD(k, pp) eq 1 then
+                coeffs[pp*k] := coeffs[pp]*coeffs[k];
+            end if;
+        end for;
+    end for;
+    return coeffs;
+end function;
+
+
+function qexpCoeffs()
+    // To make the coeffs of the qexp of the newform in the Hecke field type "qexpCoeffs();"
+    weight := 2;
+    raw_aps := [*
+[*0, -1*],
+        [*-2, 1*],
+        [*0, 0*],
+        [*0, -2*],
+        [*0, 3*],
+        [*-2, 2*],
+        [*-3, 0*],
+        [*-1, 0*],
+        [*6, -6*],
+        [*0, -6*],
+        [*4, -4*],
+        [*-4, 0*],
+        [*-9, 9*],
+        [*0, 1*],
+        [*0, 6*],
+        [*12, 0*],
+        [*-3, 3*],
+        [*0, -8*],
+        [*-5, 5*],
+        [*-12, 0*],
+        [*11, 0*],
+        [*0, 4*],
+        [*0, -12*],
+        [*6, 0*],
+        [*0, -5*],
+        [*0, 0*],
+        [*-14, 14*],
+        [*3, 0*],
+        [*-16, 0*],
+        [*-6, 6*],
+        [*2, 0*],
+        [*0, 0*],
+        [*0, 3*],
+        [*19, -19*],
+        [*6, -6*],
+        [*0, 10*],
+        [*4, -4*],
+        [*-4, 0*],
+        [*12, -12*],
+        [*0, 6*],
+        [*12, 0*],
+        [*14, 0*],
+        [*0, 18*],
+        [*-5, 5*],
+        [*-12, 0*],
+        [*-10, 0*],
+        [*-20, 20*],
+        [*0, -26*],
+        [*0, -21*],
+        [*-14, 14*],
+        [*3, 0*],
+        [*-6, 6*],
+        [*0, 7*],
+        [*21, 0*],
+        [*21, -21*],
+        [*0, -18*],
+        [*-24, 0*],
+        [*20, 0*],
+        [*0, 10*],
+        [*0, -6*],
+        [*4, -4*],
+        [*-30, 30*],
+        [*-7, 0*],
+        [*18, -18*],
+        [*0, -29*],
+        [*0, 18*],
+        [*0, 4*],
+        [*1, -1*],
+        [*-33, 33*],
+        [*0, 16*],
+        [*0, 21*],
+        [*-18, 0*],
+        [*0, 28*],
+        [*34, -34*],
+        [*23, 0*],
+        [*0, 0*],
+        [*0, -18*],
+        [*20, 0*],
+        [*27, -27*],
+        [*-17, 17*],
+        [*12, -12*],
+        [*0, -20*],
+        [*-30, 0*],
+        [*-7, 0*],
+        [*0, -8*],
+        [*0, -3*],
+        [*9, 0*],
+        [*0, -17*],
+        [*0, 30*],
+        [*-20, 20*],
+        [*-15, 0*],
+        [*0, 42*],
+        [*26, 0*],
+        [*15, -15*],
+        [*13, -13*],
+        [*0, 0*],
+        [*0, 0*],
+        [*-3, 0*],
+        [*20, 0*],
+        [*-4, 0*],
+        [*0, 1*],
+        [*-30, 0*],
+        [*39, -39*],
+        [*0, -45*],
+        [*37, -37*],
+        [*11, 0*],
+        [*0, 9*],
+        [*6, 0*],
+        [*-12, 12*],
+        [*0, 37*],
+        [*28, -28*],
+        [*-16, 0*],
+        [*-27, 27*],
+        [*0, -35*],
+        [*-40, 0*],
+        [*0, 3*],
+        [*-23, 23*],
+        [*18, 0*],
+        [*6, -6*],
+        [*0, 36*],
+        [*4, -4*],
+        [*0, 22*],
+        [*0, -36*],
+        [*-9, 0*],
+        [*0, -8*],
+        [*30, 0*],
+        [*0, 4*],
+        [*-36, 0*],
+        [*0, -26*],
+        [*-14, 14*],
+        [*47, 0*],
+        [*-6, 6*],
+        [*-8, 8*],
+        [*2, 0*],
+        [*-42, 42*],
+        [*-2, 2*],
+        [*18, 0*],
+        [*4, -4*],
+        [*12, -12*],
+        [*33, 0*],
+        [*-7, 0*],
+        [*0, 18*],
+        [*16, -16*],
+        [*-12, 0*],
+        [*-10, 0*],
+        [*0, -12*],
+        [*0, -26*],
+        [*0, 42*],
+        [*-35, 35*],
+        [*24, 0*],
+        [*-8, 8*],
+        [*-42, 0*],
+        [*-19, 0*],
+        [*0, 0*],
+        [*0, 31*],
+        [*0, -48*],
+        [*38, 0*],
+        [*0, 6*],
+        [*14, 0*],
+        [*60, -60*],
+        [*0, -3*],
+        [*9, 0*],
+        [*22, -22*],
+        [*-36, 0*],
+        [*51, -51*],
+        [*0, 0*],
+        [*-16, 0*],
+        [*0, 28*]*];
+    aps := ConvertToHeckeField(raw_aps);
+    chi := MakeCharacter_18_c_Hecke(Universe(aps));
+    return ExtendMultiplicatively(weight, aps, chi);
+end function;
+
+
+// To make the newform (type ModFrm), type "MakeNewformModFrm_18_2_c_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose lines below.
+// The precision argument determines an initial guess on how many Fourier coefficients to use.
+// This guess is increased enough to uniquely determine the newform.
+function MakeNewformModFrm_18_2_c_a(:prec:=2)
+    chi := MakeCharacter_18_c();
+    f_vec := qexpCoeffs();
+    Kf := Universe(f_vec);
+    // SetVerbose("ModularForms", true);
+    // SetVerbose("ModularSymbols", true);
+    S := CuspidalSubspace(ModularForms(chi, 2));
+    S := BaseChange(S, Kf);
+    maxprec := NextPrime(997) - 1;
+    while true do
+        trunc_vec := Vector(Kf, [0] cat [f_vec[i]: i in [1..prec]]);
+        B := Basis(S, prec + 1);
+        S_basismat := Matrix([AbsEltseq(g): g in B]);
+        if Rank(S_basismat) eq Min(NumberOfRows(S_basismat), NumberOfColumns(S_basismat)) then
+            S_basismat := ChangeRing(S_basismat,Kf);
+            f_lincom := Solution(S_basismat,trunc_vec);
+            f := &+[f_lincom[i]*Basis(S)[i] : i in [1..#Basis(S)]];
+            return f;
+        end if;
+        error if prec eq maxprec, "Unable to distinguish newform within newspace";
+        prec := Min(Ceiling(1.25 * prec), maxprec);
+    end while;
+end function;
+
+
+// To make the Hecke irreducible modular symbols subspace (type ModSym)
+// containing the newform, type "MakeNewformModSym_18_2_c_a();".
+// This may take a long time!  To see verbose output, uncomment the SetVerbose line below.
+// The default sign is -1.  You can change this with the optional parameter "sign".
+function MakeNewformModSym_18_2_c_a( : sign := -1)
+    R<x> := PolynomialRing(Rationals());
+    chi := MakeCharacter_18_c();
+    // SetVerbose("ModularSymbols", true);
+    Snew := NewSubspace(CuspidalSubspace(ModularSymbols(chi,2,sign)));
+    Vf := Kernel([],Snew);
+    return Vf;
+end function;
+
+f := MakeNewformModFrm_18_2_c_a();
+CC<i> := ComplexField();
+rts := [r[1] : r in Roots(MinimalPolynomial(BaseField(f).1),CC)];
+Ls := [LSeries(f : Embedding := hom<BaseRing(f) -> CC | rts[i]>) : i in [1..2]];
+G := DirichletGroup(73, CyclotomicField(3));
+chi := G.1^4;
+Modulus(chi);Conductor(chi);
+Lchi := LSeries(chi);
+Ltwist := TensorProduct(Ls[1],Lchi);
+
+Evaluate(Ltwist,1);
