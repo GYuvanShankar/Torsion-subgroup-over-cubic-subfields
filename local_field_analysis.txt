@@ -18,6 +18,18 @@ local_field_analysis_13 := function(n)
     P<x>:=PolynomialRing(Rationals());
     C:=HyperellipticCurve(x^6-2*x^5+x^4-2*x^3+6*x^2-4*x+1);
     J:=Jacobian(C);
+    if n eq 9 then 
+        F_17 := FiniteField(17);
+        J1 := BaseChange(J, F_17);
+        print "#J(F_17) = ", #J1;
+        F_125 := FiniteField(125);
+        J2 := BaseChange(J, F_125);
+        print "#J(F_125) = ", #J2;  
+        F_19 := FiniteField(19);
+        J3 := BaseChange(J, F_19);
+        print "#J(F_19) = ", #J3;
+        print "gcd = ", GCD(#J3,GCD(#J1, #J2));
+    end if;
     if n eq 19 or n eq 91 then
         F_7 := FiniteField(7);
         J1 := BaseChange(J, F_7);
