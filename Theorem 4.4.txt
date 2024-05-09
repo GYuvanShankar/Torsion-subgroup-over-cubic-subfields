@@ -1,0 +1,27 @@
+SetClassGroupBounds("GRH");
+P<x>:=PolynomialRing(Rationals());
+G:=x^3+x+1;
+H:=x^5+2*x^4+x^2+2*x^3;
+C:=HyperellipticCurve(H,G);
+
+
+C:=SimplifiedModel(C);C;
+J:=Jacobian(C);
+#Points(J:Bound:=1000);
+pts:=Points(C:Bound:=1000);pts;
+ptsJ := [ pts[i] - pts[1] : i in [2,3,4,5,6] ];
+ptsJ;
+D:=Divisor(C!pts[2])- Divisor(C!pts[1]);
+for n in [1..21] do;
+n;
+bool,_:=RiemannRochSpace(n*D+Divisor(C!pts[1]));
+Dimension(bool);
+print ".....";
+end for;
+
+A,p:=MordellWeilGroupGenus2(J);p;
+for a in A do;
+a;
+p(a);
+
+end for;
